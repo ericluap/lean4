@@ -14,6 +14,10 @@ public import Lean.Meta.Constructions.NoConfusionLinear
 
 open Lean Meta
 
+/--
+For an inductive type `T` builds a function `T.toCtorIdx : T → Nat` that returns the constructor
+index of the given value.  Assumes `Nat` and `T.casesOn` to be defined already.
+-/
 public def mkToCtorIdx (indName : Name) : MetaM Unit := do
   if (← getEnv).contains ``Nat then
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
