@@ -32,6 +32,7 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
     let us := info.levelParams.map mkLevelParam
     let declName := Name.mkStr indName "toCtorIdx"
     forallBoundedTelescope info.type (info.numParams + info.numIndices) fun xs _ => do
+      withNewBinderInfos (xs.map (⟨·.fvarId!, .implicit⟩)) do
       let params : Array Expr := xs[:info.numParams]
       let indices : Array Expr := xs[info.numParams:]
       let indType := mkAppN (mkConst indName us) xs

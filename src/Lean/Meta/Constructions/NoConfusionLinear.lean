@@ -80,22 +80,22 @@ def maxLevels (es : Array Expr) : MetaM Level := do
 
 private def mkPULift (r : Level) (t : Expr) : MetaM Expr := do
   let s ← getLevel t
-  return mkApp (mkConst `PULift [r,s]) t
+  return mkApp (mkConst ``PULift [r,s]) t
 
 private def withMkPULiftUp (t : Expr) (k : Expr → MetaM Expr) : MetaM Expr := do
   let t  ← whnf t
-  if t.isAppOfArity `PULift 1 then
+  if t.isAppOfArity ``PULift 1 then
     let t' := t.appArg!
     let e ← k t'
-    return mkApp2 (mkConst `PULift.up (t.appFn!.constLevels!)) t' e
+    return mkApp2 (mkConst ``PULift.up (t.appFn!.constLevels!)) t' e
   else
     throwError "withMkPULiftUp: expected PULift type, got {t}"
 
 private def mkPULiftDown (e : Expr) : MetaM Expr := do
   let t ← whnf (← inferType e)
-  if t.isAppOfArity `PULift 1 then
+  if t.isAppOfArity ``PULift 1 then
     let t' := t.appArg!
-    return mkApp2 (mkConst `PULift.down t.appFn!.constLevels!) t' e
+    return mkApp2 (mkConst ``PULift.down t.appFn!.constLevels!) t' e
   else
     throwError "mkULiftDown: expected ULift type, got {t}"
 
