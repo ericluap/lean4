@@ -17,6 +17,14 @@
      "position": {"line": 12, "character": 15}},
     "id": {"const": {"declName": "C.f2"}},
     "cPos": 1}},
+  {"label": "toCtorIdx",
+   "kind": 3,
+   "data":
+   {"params":
+    {"textDocument": {"uri": "file:///completion6.lean"},
+     "position": {"line": 12, "character": 15}},
+    "id": {"const": {"declName": "C.toCtorIdx"}},
+    "cPos": 1}},
   {"label": "toC",
    "kind": 5,
    "data":
@@ -68,6 +76,14 @@
     {"textDocument": {"uri": "file:///completion6.lean"},
      "position": {"line": 21, "character": 4}},
     "id": {"const": {"declName": "E.doubleF1"}},
+    "cPos": 1}},
+  {"label": "toCtorIdx",
+   "kind": 3,
+   "data":
+   {"params":
+    {"textDocument": {"uri": "file:///completion6.lean"},
+     "position": {"line": 21, "character": 4}},
+    "id": {"const": {"declName": "C.toCtorIdx"}},
     "cPos": 1}},
   {"label": "toC",
    "kind": 5,

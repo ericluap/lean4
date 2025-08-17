@@ -16,11 +16,19 @@ open Lean Meta
 
 /--
 For an inductive type `T` builds a function `T.toCtorIdx : T → Nat` that returns the constructor
-index of the given value.  Assumes `Nat` and `T.casesOn` to be defined already.
+index of the given value.
+Does nothing if `T` does not eliminate into `Type` or if `T` is unsafe.
+Assumes `Nat` and `T.casesOn` to be defined already.
 -/
 public def mkToCtorIdx (indName : Name) : MetaM Unit := do
-  if (← getEnv).contains ``Nat then
+  prependError m!"failed to construct `T.toCtorIdx` for `{.ofConstName indName}`:" do
+    unless (← getEnv).contains ``Nat do return
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
+    if info.isUnsafe then return
+    let casesOnName := mkCasesOnName indName
+    let casesOnInfo ← getConstInfo casesOnName
+    unless casesOnInfo.levelParams.length > info.levelParams.length do return
+
     let us := info.levelParams.map mkLevelParam
     let declName := Name.mkStr indName "toCtorIdx"
     forallBoundedTelescope info.type (info.numParams + info.numIndices) fun xs _ => do
@@ -32,14 +40,14 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
       let declType ← mkForallFVars xs declType
       let declValue ← withLocalDeclD `x indType fun x => do
         let motive ← mkLambdaFVars (indices.push x) natType
-        let mut value := mkConst (mkCasesOnName indName) (levelOne::us)
+        let mut value := mkConst casesOnName (levelOne::us)
         value := mkAppN value params
         value := mkApp value motive
         value := mkAppN value indices
         value := mkApp value x
         for c in info.ctors do
           let cInfo ← getConstInfoCtor c
-          let cType ← instantiateForall cInfo.type xs
+          let cType ← instantiateForall cInfo.type params
           let alt ← forallBoundedTelescope cType cInfo.numFields fun ys _ =>
             mkLambdaFVars ys <| mkNatLit cInfo.cidx
           value := mkApp value alt

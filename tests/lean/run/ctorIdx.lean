@@ -29,3 +29,21 @@ fun α x => x.casesOn (fun x => 0) (fun y => 1) fun z => 2
 -/
 #guard_msgs in
 #print Nested.toCtorIdx
+
+mutual
+inductive A (m : Nat) : Nat → Type
+  | self : A m n → A m (n+m)
+  | other : B m n → A m (n+m)
+  | empty : A m 0
+inductive B (m : Nat) : Nat → Type
+  | self : B m n → B m (n+m)
+  | other : A m n → B m (n+m)
+  | empty : B m 0
+end
+
+/--
+info: @[reducible] def A.toCtorIdx : (m a : Nat) → A m a → Nat :=
+fun m a x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
+-/
+#guard_msgs in
+#print A.toCtorIdx

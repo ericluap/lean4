@@ -13,7 +13,15 @@
 {"textDocument": {"uri": "file:///travellingCompletions.lean"},
  "position": {"line": 20, "character": 20}}
 {"items":
- [{"label": "foobar",
+ [{"label": "toCtorIdx",
+   "kind": 3,
+   "data":
+   {"params":
+    {"textDocument": {"uri": "file:///travellingCompletions.lean"},
+     "position": {"line": 20, "character": 20}},
+    "id": {"const": {"declName": "Bar.toCtorIdx"}},
+    "cPos": 2}},
+  {"label": "foobar",
    "kind": 5,
    "data":
    {"params":
@@ -25,7 +33,15 @@
 {"textDocument": {"uri": "file:///travellingCompletions.lean"},
  "position": {"line": 24, "character": 16}}
 {"items":
- [{"label": "foobar",
+ [{"label": "toCtorIdx",
+   "kind": 3,
+   "data":
+   {"params":
+    {"textDocument": {"uri": "file:///travellingCompletions.lean"},
+     "position": {"line": 24, "character": 16}},
+    "id": {"const": {"declName": "Bar.toCtorIdx"}},
+    "cPos": 2}},
+  {"label": "foobar",
    "kind": 5,
    "data":
    {"params":

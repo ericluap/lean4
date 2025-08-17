@@ -61,6 +61,14 @@
      "position": {"line": 28, "character": 30}},
     "id": {"const": {"declName": "CustomAnd.mk"}},
     "cPos": 0}},
+  {"label": "toCtorIdx",
+   "kind": 3,
+   "data":
+   {"params":
+    {"textDocument": {"uri": "file:///completionFallback.lean"},
+     "position": {"line": 28, "character": 30}},
+    "id": {"const": {"declName": "CustomAnd.toCtorIdx"}},
+    "cPos": 0}},
   {"label": "hb",
    "kind": 23,
    "data":
