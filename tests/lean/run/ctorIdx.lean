@@ -47,3 +47,9 @@ fun m a x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
 -/
 #guard_msgs in
 #print A.toCtorIdx
+/--
+info: @[reducible] def B.toCtorIdx : (m a : Nat) → B m a → Nat :=
+fun m a x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
+-/
+#guard_msgs in
+#print B.toCtorIdx
