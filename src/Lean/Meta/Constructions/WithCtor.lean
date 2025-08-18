@@ -17,11 +17,6 @@ namespace Lean
 
 open Meta
 
-def deps : Array Lean.Name :=
-  #[ ``cond, ``ULift, ``Eq.ndrec, ``Not, ``dite, ``Nat.decEq, ``Nat.blt ]
-
-def canUse : MetaM Bool := deps.allM (hasConst · (skipRealize := true))
-
 -- Right-associates the top-most `max`s to work around #5695 for prettier code
 def reassocMax (l : Level) : Level :=
   let lvls := maxArgs l #[]
