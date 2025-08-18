@@ -87,7 +87,7 @@ where
         let withName := asPrivateAs withName indVal.name
         rhs ← `(
           if h : $(mkCIdent toCtorIdxName) $x2:ident = $(quote ctorIdx):num then
-            $(mkIdent withName) $x2:term h (fun $ctorArgs2.reverse:term* => $rhs:term)
+            $(mkIdent withName) $x2:term h (@fun $ctorArgs2.reverse:term* => $rhs:term)
           else
             false
         )
