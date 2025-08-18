@@ -823,6 +823,13 @@ identifier names chosen in the docstring for consistency.
     "[" >> sepBy1 ident ", " >> "]"
 
 /--
+  This is an auxiliary command for generating `withCtor` functions fo
+  inductive types defined at `Prelude.lean`.
+  It is meant for bootstrapping purposes only. -/
+@[builtin_command_parser] def genWithCtor := leading_parser
+  "gen_withCtor% " >> ident
+
+/--
   This is an auxiliary command for generation constructor injectivity theorems for
   inductive types defined at `Prelude.lean`.
   It is meant for bootstrapping purposes only. -/

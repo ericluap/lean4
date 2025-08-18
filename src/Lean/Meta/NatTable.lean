@@ -31,5 +31,5 @@ public def mkNatLookupTable (i : Expr) (type : Expr) (es : Array Expr) : MetaM E
         let mid := (start + stop) / 2
         let low ← go start mid
         let high ← go mid stop
-        return mkApp4 (mkConst ``cond [u]) type (mkApp2 (mkConst ``Nat.blt) i (mkRawNatLit mid)) low high
+        return mkApp4 (mkConst ``cond [u]) type (mkApp2 (mkConst ``Nat.ble) i (mkRawNatLit (mid-1))) low high
     go 0 es.size

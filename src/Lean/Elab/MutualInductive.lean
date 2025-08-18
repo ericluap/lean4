@@ -970,12 +970,12 @@ private def mkAuxConstructions (declNames : Array Name) : TermElabM Unit := do
   let hasHEq  := env.contains ``HEq
   let hasUnit := env.contains ``PUnit
   let hasProd := env.contains ``Prod
-  let hasNat := env.contains ``Nat
+  let hasNat  := env.contains ``Nat
   for n in declNames do
     mkRecOn n
     if hasUnit then mkCasesOn n
-    if hasUnit && hasNat then mkToCtorIdx n
-    if hasUnit && hasEq then mkWithCtor n
+    if hasNat then mkToCtorIdx n
+    if hasNat then mkWithCtor n
     if hasUnit && hasEq && hasHEq then mkNoConfusion n
     if hasUnit && hasProd then mkBelow n
   for n in declNames do

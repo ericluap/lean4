@@ -82,15 +82,21 @@ where
           ctorArgs1 := ctorArgs1.push (← `(_))
           -- ctorArgs2 := ctorArgs2.push (← `(_))
         let x2:= mkIdent header.targetNames[1]!
-        let toCtorIdxName := .str indVal.name "toCtorIdx"
-        let withName := .str ctorName "with" -- TODO Extract
-        let withName := asPrivateAs withName indVal.name
-        rhs ← `(
-          if h : $(mkCIdent toCtorIdxName) $x2:ident = $(quote ctorIdx):num then
-            $(mkIdent withName) $x2:term h (@fun $ctorArgs2.reverse:term* => $rhs:term)
-          else
-            false
-        )
+        if indVal.numCtors > 1 then
+          let toCtorIdxName := .str indVal.name "toCtorIdx"
+          let withName := .str ctorName "with" -- TODO Extract
+          let withName := asPrivateAs withName indVal.name
+          rhs ← `(
+            if h : $(mkCIdent toCtorIdxName) $x2:ident = $(quote ctorIdx):num then
+              $(mkIdent withName) $x2:term h (@fun $ctorArgs2.reverse:term* => $rhs:term)
+            else
+              false
+          )
+        else
+          let casesOnName := .str indVal.name "casesOn" -- TODO Extract
+          rhs ← `(
+            $(mkIdent casesOnName) $x2:term (@fun $ctorArgs2.reverse:term* => $rhs:term)
+          )
         patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs1.reverse:term*))
         -- patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs2.reverse:term*))
         `(matchAltExpr| | $[$patterns:term],* => $rhs:term)

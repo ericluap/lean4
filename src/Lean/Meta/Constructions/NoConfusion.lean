@@ -28,8 +28,9 @@ def mkNoConfusionCore (declName : Name) : MetaM Unit := do
   let .inductInfo indVal ← getConstInfo declName | return
   let recInfo ← getConstInfo (mkRecName declName)
   unless recInfo.levelParams.length > indVal.levelParams.length do return
+  if (← isPropFormerType indVal.type) then return
 
-  let useLinear ← NoConfusionLinear.canUse
+  let useLinear ← NoConfusionLinear.canUse declName
 
   if useLinear then
     NoConfusionLinear.mkNoConfusionTypeLinear declName
@@ -62,12 +63,16 @@ where
     let v ← mkFreshUserName `v
     let enumType := mkConst enumName us
     let sortV := mkSort (mkLevelParam v)
-    let toCtorIdx := mkConst (Name.mkStr enumName "toCtorIdx") us
     withLocalDeclD `P sortV fun P =>
     withLocalDeclD `x enumType fun x =>
     withLocalDeclD `y enumType fun y => do
       let declType  ← mkForallFVars #[P, x, y] sortV
-      let declValue ← mkLambdaFVars #[P, x, y] (← mkAppM ``noConfusionTypeEnum #[toCtorIdx, P, x, y])
+      let declValue ←
+        if info.numCtors = 1 then
+          mkLambdaFVars #[P, x, y] (← mkArrow P P)
+        else
+          let toCtorIdx := mkConst (Name.mkStr enumName "toCtorIdx") us
+          mkLambdaFVars #[P, x, y] (← mkAppM ``noConfusionTypeEnum #[toCtorIdx, P, x, y])
       let declName  := Name.mkStr enumName "noConfusionType"
       addAndCompile <| Declaration.defnDecl {
         name        := declName
@@ -92,7 +97,11 @@ where
     withLocalDecl `y BinderInfo.implicit enumType fun y => do
     withLocalDeclD `h (← mkEq x y) fun h => do
       let declType  ← mkForallFVars #[P, x, y, h] (mkApp3 noConfusionType P x y)
-      let declValue ← mkLambdaFVars #[P, x, y, h] (← mkAppOptM ``noConfusionEnum #[none, none, none, toCtorIdx, P, x, y, h])
+      let declValue ← mkLambdaFVars #[P, x, y, h] <| ← do
+        if info.numCtors = 1 then
+          withLocalDeclD `p P fun p => mkLambdaFVars #[p] p
+        else
+          mkAppOptM ``noConfusionEnum #[none, none, none, toCtorIdx, P, x, y, h]
       let declName  := Name.mkStr enumName "noConfusion"
       addAndCompile <| Declaration.defnDecl {
         name        := declName

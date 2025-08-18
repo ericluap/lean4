@@ -39,17 +39,6 @@ register_builtin_option backwards.linearNoConfusionType : Bool := {
   descr    := "use the linear-size construction for the `noConfusionType` declaration of an inductive type. Set to false to use the previous, simpler but quadratic-size construction. "
 }
 
-/--
-List of constants that the linear `noConfusionType` construction depends on.
--/
-def deps : Array Lean.Name :=
-  #[ ``cond, ``ULift, ``Eq.ndrec, ``Not, ``dite, ``Nat.decEq, ``Nat.blt ]
-
-public def canUse : MetaM Bool := do
-  unless backwards.linearNoConfusionType.get (← getOptions) do return false
-  unless (← NoConfusionLinear.deps.allM (hasConst · (skipRealize := true))) do return false
-  return true
-
 def mkToCtorIdxName (indName : Name) : Name :=
   Name.str indName "toCtorIdx"
 
@@ -58,6 +47,14 @@ def mkNoConfusionTypeName (indName : Name) : Name :=
 
 def mkCtorWithName (conName : Name) : Name :=
   Name.str conName "with"
+
+public def canUse (indName : Name) : MetaM Bool := do
+  unless backwards.linearNoConfusionType.get (← getOptions) do return false
+  -- Check if the prelude is loaded
+  unless (← hasConst ``Eq.propIntro) do return false
+  -- Check if we have the withCtor helpers
+  unless (← hasConst (indName.str "withCtor")) do return false
+  return true
 
 def asPrivateAs (n1 n2 : Name) : Name :=
   match privatePrefix? n2 with
@@ -100,7 +97,7 @@ public def mkNoConfusionTypeLinear (indName : Name) : MetaM Unit := do
               let altType ← inferType alt
               forallTelescope altType fun zs1 _ => do
                 let toCtorIdxApp := mkAppN (mkConst (mkToCtorIdxName indName) us) (xs ++ ys ++ #[x2])
-                let alt ← mkIfNatEq PType (toCtorIdxApp) (mkNatLit i)
+                let alt ← mkIfNatEq PType (toCtorIdxApp) (mkRawNatLit i)
                   («else» := fun _ => pure P) fun h => do
                   let conName := info.ctors[i]!
                   let withName := mkCtorWithName conName

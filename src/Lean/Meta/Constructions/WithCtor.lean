@@ -186,15 +186,15 @@ def mkConWith (indName : Name) : MetaM Unit := do
       let alts := xs[info.numParams + 1 + info.numIndices + 1:]
       let alt := alts[i]!
       let toCtorApp := mkAppN (mkConst (mkToCtorIdxName indName) us) (params ++ ism)
-      let hType ← mkEq toCtorApp (mkNatLit i)
+      let hType ← mkEq toCtorApp (mkRawNatLit i)
       withLocalDeclD `h hType fun h => do
       let e := mkConst withCtorName (v :: us)
       let e := mkAppN e params
       let e := mkApp e motive
-      let e := mkApp e (mkNatLit i)
+      let e := mkApp e (mkRawNatLit i)
       let e := mkAppN e ism
       let e := mkApp e (← mkEqSymm h)
-      let withCtorTypeApp := mkAppN (mkConst withCtorTypeName (v :: us)) ((params.push motive).push (mkNatLit i))
+      let withCtorTypeApp := mkAppN (mkConst withCtorTypeName (v :: us)) ((params.push motive).push (mkRawNatLit i))
       let e := mkApp e (← withMkPULiftUp withCtorTypeApp fun _ => pure alt)
       mkLambdaFVars (params ++ #[motive] ++ ism ++ #[h, alt]) e
 
@@ -212,10 +212,12 @@ def mkConWith (indName : Name) : MetaM Unit := do
 
 
 public def mkWithCtor (indName : Name) : MetaM Unit := do
+  unless (← getEnv).contains (indName.str "toCtorIdx") do return
   let .inductInfo indVal ← getConstInfo indName | return
   -- Do not do anything if there are no constructors
   if indVal.numCtors = 0 then return
-  -- Do not do anything unless can_elim_to_type.
+  -- Do not do anything unless its a type and can elim to type
+  if (← isPropFormerType indVal.type) then return
   let recInfo ← getConstInfo (mkRecName indName)
   unless recInfo.levelParams.length > indVal.levelParams.length do return
 

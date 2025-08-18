@@ -15,15 +15,21 @@ public import Lean.Meta.Constructions.NoConfusionLinear
 open Lean Meta
 
 /--
-For an inductive type `T` builds a function `T.toCtorIdx : T → Nat` that returns the constructor
-index of the given value.
+For an inductive type `T` with more than one function builds a function `T.toCtorIdx : T → Nat` that
+returns the constructor index of the given value.
 Does nothing if `T` does not eliminate into `Type` or if `T` is unsafe.
-Assumes `Nat` and `T.casesOn` to be defined already.
+Assumes `T.casesOn` to be defined already.
 -/
 public def mkToCtorIdx (indName : Name) : MetaM Unit := do
   prependError m!"failed to construct `T.toCtorIdx` for `{.ofConstName indName}`:" do
-    unless (← getEnv).contains ``Nat do return
+    -- These types have `.casesOn` functions that we cannot use in compiled code before the
+    -- corresponding `decEq` function is available, so do not create this eagerly
+    if indName == ``Nat && !(← hasConst ``Nat.decEq) then return
+    if indName == ``Int && !(← hasConst ``Int.decEq) then return
+
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
+    unless info.numCtors > 1 do return
+    if (← isPropFormerType info.type) then return
     let casesOnName := mkCasesOnName indName
     let casesOnInfo ← getConstInfo casesOnName
     unless casesOnInfo.levelParams.length > info.levelParams.length do return
@@ -49,7 +55,7 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
           let cInfo ← getConstInfoCtor c
           let cType ← instantiateForall cInfo.type params
           let alt ← forallBoundedTelescope cType cInfo.numFields fun ys _ =>
-            mkLambdaFVars ys <| mkNatLit cInfo.cidx
+            mkLambdaFVars ys <| mkRawNatLit cInfo.cidx
           value := mkApp value alt
         mkLambdaFVars (xs.push x) value
       addAndCompile (.defnDecl (← mkDefinitionValInferringUnsafe
