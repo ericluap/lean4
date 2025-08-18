@@ -8,13 +8,5 @@
     {"textDocument": {"uri": "file:///editCompletion.lean"},
      "position": {"line": 3, "character": 22}},
     "id": {"const": {"declName": "Foo.foo"}},
-    "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///editCompletion.lean"},
-     "position": {"line": 3, "character": 22}},
-    "id": {"const": {"declName": "Foo.toCtorIdx"}},
     "cPos": 1}}],
  "isIncomplete": false}

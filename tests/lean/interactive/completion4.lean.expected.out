@@ -9,14 +9,6 @@
      "position": {"line": 7, "character": 4}},
     "id": {"const": {"declName": "S.pred"}},
     "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion4.lean"},
-     "position": {"line": 7, "character": 4}},
-    "id": {"const": {"declName": "S.toCtorIdx"}},
-    "cPos": 1}},
   {"label": "fn1",
    "kind": 5,
    "data":
@@ -44,14 +36,6 @@
     {"textDocument": {"uri": "file:///completion4.lean"},
      "position": {"line": 11, "character": 10}},
     "id": {"const": {"declName": "S.pred"}},
-    "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion4.lean"},
-     "position": {"line": 11, "character": 10}},
-    "id": {"const": {"declName": "S.toCtorIdx"}},
     "cPos": 1}},
   {"label": "fn1",
    "kind": 5,
@@ -81,14 +65,6 @@
      "position": {"line": 16, "character": 11}},
     "id": {"const": {"declName": "S.pred"}},
     "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion4.lean"},
-     "position": {"line": 16, "character": 11}},
-    "id": {"const": {"declName": "S.toCtorIdx"}},
-    "cPos": 1}},
   {"label": "fn1",
    "kind": 5,
    "data":
@@ -116,14 +92,6 @@
     {"textDocument": {"uri": "file:///completion4.lean"},
      "position": {"line": 20, "character": 21}},
     "id": {"const": {"declName": "S.pred"}},
-    "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion4.lean"},
-     "position": {"line": 20, "character": 21}},
-    "id": {"const": {"declName": "S.toCtorIdx"}},
     "cPos": 1}},
   {"label": "fn1",
    "kind": 5,

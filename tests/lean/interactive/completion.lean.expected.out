@@ -8,14 +8,6 @@
     {"textDocument": {"uri": "file:///completion.lean"},
      "position": {"line": 3, "character": 22}},
     "id": {"const": {"declName": "Foo.foo"}},
-    "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion.lean"},
-     "position": {"line": 3, "character": 22}},
-    "id": {"const": {"declName": "Foo.toCtorIdx"}},
     "cPos": 1}}],
  "isIncomplete": false}
 {"textDocument": {"uri": "file:///completion.lean"},
@@ -28,14 +20,6 @@
     {"textDocument": {"uri": "file:///completion.lean"},
      "position": {"line": 5, "character": 23}},
     "id": {"const": {"declName": "Foo.foo"}},
-    "cPos": 1}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion.lean"},
-     "position": {"line": 5, "character": 23}},
-    "id": {"const": {"declName": "Foo.toCtorIdx"}},
     "cPos": 1}}],
  "isIncomplete": false}
 {"textDocument": {"uri": "file:///completion.lean"},
@@ -48,14 +32,6 @@
     {"textDocument": {"uri": "file:///completion.lean"},
      "position": {"line": 7, "character": 28}},
     "id": {"const": {"declName": "Foo.foo"}},
-    "cPos": 0}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion.lean"},
-     "position": {"line": 7, "character": 28}},
-    "id": {"const": {"declName": "Foo.toCtorIdx"}},
     "cPos": 0}}],
  "isIncomplete": false}
 {"textDocument": {"uri": "file:///completion.lean"},
@@ -68,13 +44,5 @@
     {"textDocument": {"uri": "file:///completion.lean"},
      "position": {"line": 9, "character": 29}},
     "id": {"const": {"declName": "Foo.foo"}},
-    "cPos": 0}},
-  {"label": "toCtorIdx",
-   "kind": 3,
-   "data":
-   {"params":
-    {"textDocument": {"uri": "file:///completion.lean"},
-     "position": {"line": 9, "character": 29}},
-    "id": {"const": {"declName": "Foo.toCtorIdx"}},
     "cPos": 0}}],
  "isIncomplete": false}
