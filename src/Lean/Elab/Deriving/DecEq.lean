@@ -177,21 +177,30 @@ def mkEnumOfNatThm (declName : Name) : MetaM Unit := do
     }
 
 def mkDecEqEnum (declName : Name) : CommandElabM Unit := do
-  liftTermElabM <| mkEnumOfNat declName
-  liftTermElabM <| mkEnumOfNatThm declName
-  let ofNatIdent  := mkIdent (Name.mkStr declName "ofNat")
-  let auxThmIdent := mkIdent (Name.mkStr declName "ofNat_toCtorIdx")
-  let cmd ← `(
-    instance : DecidableEq $(mkCIdent declName) :=
-      fun x y =>
-        if h : x.toCtorIdx = y.toCtorIdx then
-          -- We use `rfl` in the following proof because the first script fails for unit-like datatypes due to etaStruct.
-          isTrue (by first | have aux := congrArg $ofNatIdent h; rw [$auxThmIdent:ident, $auxThmIdent:ident] at aux; assumption | rfl)
-        else
-          isFalse fun h => by subst h; contradiction
-  )
-  trace[Elab.Deriving.decEq] "\n{cmd}"
-  elabCommand cmd
+  let info ← getConstInfoInduct declName
+  if info.numCtors = 1 then
+    let cmd ← `(
+      instance : DecidableEq $(mkCIdent declName) :=
+        fun x y => isTrue (by rfl)
+    )
+    trace[Elab.Deriving.decEq] "\n{cmd}"
+    elabCommand cmd
+  else
+    liftTermElabM <| mkEnumOfNat declName
+    liftTermElabM <| mkEnumOfNatThm declName
+    let ofNatIdent  := mkIdent (Name.mkStr declName "ofNat")
+    let auxThmIdent := mkIdent (Name.mkStr declName "ofNat_toCtorIdx")
+    let cmd ← `(
+      instance : DecidableEq $(mkCIdent declName) :=
+        fun x y =>
+          if h : x.toCtorIdx = y.toCtorIdx then
+            -- We use `rfl` in the following proof because the first script fails for unit-like datatypes due to etaStruct.
+            isTrue (by first | have aux := congrArg $ofNatIdent h; rw [$auxThmIdent:ident, $auxThmIdent:ident] at aux; assumption | rfl)
+          else
+            isFalse fun h => by subst h; contradiction
+    )
+    trace[Elab.Deriving.decEq] "\n{cmd}"
+    elabCommand cmd
 
 def mkDecEqInstance (declName : Name) : CommandElabM Bool := do
   if (← isEnumType declName) then

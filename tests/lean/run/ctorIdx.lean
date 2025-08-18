@@ -55,17 +55,15 @@ fun {m a} x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
 #print B.toCtorIdx
 
 
-unsafe inductive U : Type
-| mk : (U → U) → U
+-- No ctorIdx for single-constructor inductives
 
-/--
-info: @[reducible] unsafe protected def U.toCtorIdx : U → Nat :=
-fun x => U.casesOn x fun a => 0
--/
+unsafe inductive U : Type | mk : (U → U) → U
+/-- error: Unknown constant `U.toCtorIdx` -/
 #guard_msgs in
 #print U.toCtorIdx
 
 -- This should not get a toCtorIdx, only types should
+
 inductive Eq' : α → α → Prop where | refl (a : α) : Eq' a a
 /-- error: Unknown constant `Eq'.toCtorIdx` -/
 #guard_msgs in

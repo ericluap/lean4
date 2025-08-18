@@ -25,23 +25,16 @@ def asPrivateAs (n1 n2 : Name) : Name :=
   | none => (privateToUserName n1)
 
 def mkMatch (header : Header) (indVal : InductiveVal) (auxFunName : Name) : TermElabM Term := do
-  let mut discrs := #[]
-  -- add indices
-  for argName in header.argNames[indVal.numParams...*] do
-    discrs := discrs.push (← mkDiscr argName)
-  discrs := discrs.push (← mkDiscr header.targetNames[0]!)
+  let casesOnName := .str indVal.name "casesOn" -- TODO Extract
   let alts ← mkAlts
-  `(match $[$discrs],* with $alts:matchAlt*)
+  let x1:= mkIdent header.targetNames[0]!
+  `($(mkCIdent casesOnName) $x1:term $alts:term*)
 where
-  mkAlts : TermElabM (Array (TSyntax ``matchAlt)) := do
+  mkAlts : TermElabM (Array Term) := do
     let mut alts := #[]
     for ctorName in indVal.ctors, ctorIdx in *...indVal.numCtors do
       let ctorInfo ← getConstInfoCtor ctorName
       let alt ← forallTelescopeReducing ctorInfo.type fun xs _type => do
-        let mut patterns := #[]
-        -- add `_` pattern for indices
-        for _ in *...indVal.numIndices do
-          patterns := patterns.push (← `(_))
         let mut ctorArgs1 : Array Term := #[]
         let mut ctorArgs2 : Array Term := #[]
         let mut rhs ← `(true)
@@ -77,10 +70,6 @@ where
               rhs_empty := false
             else
               rhs ← `($a:ident == $b:ident && $rhs)
-          -- add `_` for inductive parameters, they are inaccessible
-        for _ in *...indVal.numParams do
-          ctorArgs1 := ctorArgs1.push (← `(_))
-          -- ctorArgs2 := ctorArgs2.push (← `(_))
         let x2:= mkIdent header.targetNames[1]!
         if indVal.numCtors > 1 then
           let toCtorIdxName := .str indVal.name "toCtorIdx"
@@ -95,11 +84,9 @@ where
         else
           let casesOnName := .str indVal.name "casesOn" -- TODO Extract
           rhs ← `(
-            $(mkIdent casesOnName) $x2:term (@fun $ctorArgs2.reverse:term* => $rhs:term)
+            $(mkCIdent casesOnName) $x2:term (@fun $ctorArgs2.reverse:term* => $rhs:term)
           )
-        patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs1.reverse:term*))
-        -- patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs2.reverse:term*))
-        `(matchAltExpr| | $[$patterns:term],* => $rhs:term)
+        `(@fun $ctorArgs1.reverse:term* => $rhs:term)
       alts := alts.push alt
     return alts
 
@@ -138,7 +125,10 @@ private def mkBEqEnumFun (ctx : Context) (name : Name) : TermElabM Syntax := do
   let auxFunName := ctx.auxFunNames[0]!
   let vis := ctx.mkVisibilityFromTypes
   let expAttr := ctx.mkExposeAttrFromCtors
-  `(@[$expAttr] $vis:visibility def $(mkIdent auxFunName):ident  (x y : $(mkCIdent name)) : Bool := x.toCtorIdx == y.toCtorIdx)
+  if ctx.typeInfos[0]!.numCtors > 1 then
+    `(@[$expAttr] $vis:visibility def $(mkIdent auxFunName):ident  (x y : $(mkCIdent name)) : Bool := x.toCtorIdx == y.toCtorIdx)
+  else
+    `(@[$expAttr] $vis:visibility def $(mkIdent auxFunName):ident  (x y : $(mkCIdent name)) : Bool := true)
 
 private def mkBEqEnumCmd (name : Name): TermElabM (Array Syntax) := do
   let ctx ← mkContext "beq" name

@@ -1,6 +1,7 @@
 import Lean.Data.Json
 open Lean
 
+gen_withCtor% Except
 deriving instance BEq for Except
 
 example : Json.parse "\"\\u7406\\u79d1\"" == .ok "理科" := by native_decide
