@@ -52,7 +52,7 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
             mkLambdaFVars ys <| mkNatLit cInfo.cidx
           value := mkApp value alt
         mkLambdaFVars (xs.push x) value
-      addDecl (.defnDecl (← mkDefinitionValInferringUnsafe
+      addAndCompile (.defnDecl (← mkDefinitionValInferringUnsafe
         (name        := declName)
         (levelParams := info.levelParams)
         (type        := declType)
