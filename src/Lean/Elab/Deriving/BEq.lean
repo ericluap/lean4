@@ -19,80 +19,82 @@ open Meta
 def mkBEqHeader (indVal : InductiveVal) : TermElabM Header := do
   mkHeader `BEq 2 indVal
 
+def asPrivateAs (n1 n2 : Name) : Name :=
+  match privatePrefix? n2 with
+  | some p => Name.appendCore p (privateToUserName n1)
+  | none => (privateToUserName n1)
+
 def mkMatch (header : Header) (indVal : InductiveVal) (auxFunName : Name) : TermElabM Term := do
-  let discrs ← mkDiscrs header indVal
+  let mut discrs := #[]
+  -- add indices
+  for argName in header.argNames[indVal.numParams...*] do
+    discrs := discrs.push (← mkDiscr argName)
+  discrs := discrs.push (← mkDiscr header.targetNames[0]!)
   let alts ← mkAlts
   `(match $[$discrs],* with $alts:matchAlt*)
 where
-  mkElseAlt : TermElabM (TSyntax ``matchAltExpr) := do
-    let mut patterns := #[]
-    -- add `_` pattern for indices
-    for _ in *...indVal.numIndices do
-      patterns := patterns.push (← `(_))
-    patterns := patterns.push (← `(_))
-    patterns := patterns.push (← `(_))
-    let altRhs ← `(false)
-    `(matchAltExpr| | $[$patterns:term],* => $altRhs:term)
-
   mkAlts : TermElabM (Array (TSyntax ``matchAlt)) := do
     let mut alts := #[]
-    for ctorName in indVal.ctors do
+    for ctorName in indVal.ctors, ctorIdx in *...indVal.numCtors do
       let ctorInfo ← getConstInfoCtor ctorName
-      let alt ← forallTelescopeReducing ctorInfo.type fun xs type => do
-        let type ← Core.betaReduce type -- we 'beta-reduce' to eliminate "artificial" dependencies
+      let alt ← forallTelescopeReducing ctorInfo.type fun xs _type => do
         let mut patterns := #[]
         -- add `_` pattern for indices
         for _ in *...indVal.numIndices do
           patterns := patterns.push (← `(_))
-        let mut ctorArgs1 := #[]
-        let mut ctorArgs2 := #[]
+        let mut ctorArgs1 : Array Term := #[]
+        let mut ctorArgs2 : Array Term := #[]
         let mut rhs ← `(true)
         let mut rhs_empty := true
         for i in *...ctorInfo.numFields do
           let pos := indVal.numParams + ctorInfo.numFields - i - 1
           let x := xs[pos]!
-          if type.containsFVar x.fvarId! then
-            -- If resulting type depends on this field, we don't need to compare
-            ctorArgs1 := ctorArgs1.push (← `(_))
-            ctorArgs2 := ctorArgs2.push (← `(_))
-          else
-            let a := mkIdent (← mkFreshUserName `a)
-            let b := mkIdent (← mkFreshUserName `b)
-            ctorArgs1 := ctorArgs1.push a
-            ctorArgs2 := ctorArgs2.push b
-            let xType ← inferType x
-            if (← isProp xType) then
-              continue
-            if xType.isAppOf indVal.name then
-              if rhs_empty then
-                rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident)
-                rhs_empty := false
-              else
-                rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident && $rhs)
-            /- If `x` appears in the type of another field, use `eq_of_beq` to
-               unify the types of the subsequent variables -/
-            else if ← xs[(pos+1)...*].anyM
-                (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar)) then
-              rhs ← `(if h : $a:ident == $b:ident then by
-                        cases (eq_of_beq h)
-                        exact $rhs
-                      else false)
+          let a := mkIdent (← mkFreshUserName `a)
+          let b := mkIdent (← mkFreshUserName `b)
+          ctorArgs1 := ctorArgs1.push a
+          ctorArgs2 := ctorArgs2.push b
+          let xType ← inferType x
+          if (← isProp xType) then
+            continue
+          if xType.isAppOf indVal.name then
+            if rhs_empty then
+              rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident)
               rhs_empty := false
             else
-              if rhs_empty then
-                rhs ← `($a:ident == $b:ident)
-                rhs_empty := false
-              else
-                rhs ← `($a:ident == $b:ident && $rhs)
+              rhs ← `($(mkIdent auxFunName):ident $a:ident $b:ident && $rhs)
+          /- If `x` appears in the type of another field, use `eq_of_beq` to
+              unify the types of the subsequent variables -/
+          else if ← xs[(pos+1)...*].anyM
+              (fun fvar => (Expr.containsFVar · x.fvarId!) <$> (inferType fvar)) then
+            rhs ← `(if h : $a:ident == $b:ident then by
+                      cases (eq_of_beq h)
+                      exact $rhs
+                    else false)
+            rhs_empty := false
+          else
+            if rhs_empty then
+              rhs ← `($a:ident == $b:ident)
+              rhs_empty := false
+            else
+              rhs ← `($a:ident == $b:ident && $rhs)
           -- add `_` for inductive parameters, they are inaccessible
         for _ in *...indVal.numParams do
           ctorArgs1 := ctorArgs1.push (← `(_))
-          ctorArgs2 := ctorArgs2.push (← `(_))
+          -- ctorArgs2 := ctorArgs2.push (← `(_))
+        let x2:= mkIdent header.targetNames[1]!
+        let toCtorIdxName := .str indVal.name "toCtorIdx"
+        let withName := .str ctorName "with" -- TODO Extract
+        let withName := asPrivateAs withName indVal.name
+        rhs ← `(
+          if h : $(mkCIdent toCtorIdxName) $x2:ident = $(quote ctorIdx):num then
+            $(mkIdent withName) $x2:term h (fun $ctorArgs2.reverse:term* => $rhs:term)
+          else
+            false
+        )
         patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs1.reverse:term*))
-        patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs2.reverse:term*))
+        -- patterns := patterns.push (← `(@$(mkIdent ctorName):ident $ctorArgs2.reverse:term*))
         `(matchAltExpr| | $[$patterns:term],* => $rhs:term)
       alts := alts.push alt
-    alts := alts.push (← mkElseAlt)
     return alts
 
 def mkAuxFunction (ctx : Context) (i : Nat) : TermElabM Command := do
@@ -145,7 +147,7 @@ def mkBEqInstance (declName : Name) : CommandElabM Unit := do
       if (← isEnumType declName) then
         mkBEqEnumCmd declName
       else
-         mkBEqInstanceCmds declName
+        mkBEqInstanceCmds declName
     cmds.forM elabCommand
 
 def mkBEqInstanceHandler (declNames : Array Name) : CommandElabM Bool := do

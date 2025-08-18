@@ -12,6 +12,7 @@ public import Lean.Meta.AppBuilder
 public import Lean.Meta.CompletionName
 import Lean.Meta.Constructions.ToCtorIdx
 import Lean.Meta.NatTable
+import Lean.Elab.App
 
 namespace Lean
 
@@ -206,7 +207,9 @@ def mkConWith (indName : Name) : MetaM Unit := do
     ))
     modifyEnv fun env => addToCompletionBlackList env declName
     modifyEnv fun env => addProtected env declName
+    Elab.Term.elabAsElim.setTag declName
     setReducibleAttribute declName
+
 
 public def mkWithCtor (indName : Name) : MetaM Unit := do
   let .inductInfo indVal ← getConstInfo indName | return
