@@ -24,7 +24,6 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
   prependError m!"failed to construct `T.toCtorIdx` for `{.ofConstName indName}`:" do
     unless (← getEnv).contains ``Nat do return
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
-    if info.isUnsafe then return
     let casesOnName := mkCasesOnName indName
     let casesOnInfo ← getConstInfo casesOnName
     unless casesOnInfo.levelParams.length > info.levelParams.length do return
@@ -53,12 +52,13 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
             mkLambdaFVars ys <| mkNatLit cInfo.cidx
           value := mkApp value alt
         mkLambdaFVars (xs.push x) value
-      addAndCompile <| Declaration.defnDecl {
-        name        := declName
-        levelParams := info.levelParams
-        type        := declType
-        value       := declValue
-        safety      := DefinitionSafety.safe
-        hints       := ReducibilityHints.abbrev
-      }
+      addDecl (.defnDecl (← mkDefinitionValInferringUnsafe
+        (name        := declName)
+        (levelParams := info.levelParams)
+        (type        := declType)
+        (value       := declValue)
+        (hints       := ReducibilityHints.abbrev)
+      ))
+      modifyEnv fun env => addToCompletionBlackList env declName
+      modifyEnv fun env => addProtected env declName
       setReducibleAttribute declName

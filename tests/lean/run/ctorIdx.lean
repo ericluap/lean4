@@ -24,8 +24,8 @@ inductive Nested (α : Type) where
   | a3 (z : List (Nested α))
 
 /--
-info: @[reducible] def Nested.toCtorIdx : (α : Type) → Nested α → Nat :=
-fun α x => x.casesOn (fun x => 0) (fun y => 1) fun z => 2
+info: @[reducible] def Nested.toCtorIdx : {α : Type} → Nested α → Nat :=
+fun {α} x => x.casesOn (fun x => 0) (fun y => 1) fun z => 2
 -/
 #guard_msgs in
 #print Nested.toCtorIdx
@@ -42,14 +42,21 @@ inductive B (m : Nat) : Nat → Type
 end
 
 /--
-info: @[reducible] def A.toCtorIdx : (m a : Nat) → A m a → Nat :=
-fun m a x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
+info: @[reducible] def A.toCtorIdx : {m a : Nat} → A m a → Nat :=
+fun {m a} x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
 -/
 #guard_msgs in
 #print A.toCtorIdx
 /--
-info: @[reducible] def B.toCtorIdx : (m a : Nat) → B m a → Nat :=
-fun m a x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
+info: @[reducible] def B.toCtorIdx : {m a : Nat} → B m a → Nat :=
+fun {m a} x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
 -/
 #guard_msgs in
 #print B.toCtorIdx
+
+
+unsafe inductive U
+| mk : (U → U) → U
+
+#guard_msgs in
+#print U.toCtorIdx

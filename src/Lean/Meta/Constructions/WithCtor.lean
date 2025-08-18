@@ -46,7 +46,7 @@ def mkPULift (r : Level) (t : Expr) : MetaM Expr := do
   return mkApp (mkConst `PULift [r,s]) t
 
 def withMkPULiftUp (t : Expr) (k : Expr → MetaM Expr) : MetaM Expr := do
-  let t  ← whnf t
+  let t ← whnf t
   if t.isAppOfArity `PULift 1 then
     let t' := t.appArg!
     let e ← k t'
@@ -108,9 +108,8 @@ def mkWithCtorType (indName : Name) : MetaM Unit := do
   modifyEnv fun env => addProtected env declName
   setReducibleAttribute declName
 
-def mkWithCtor (indName : Name) : MetaM Unit := do
+def mkIndWithCtor (indName : Name) : MetaM Unit := do
   let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
-  if info.numCtors = 0 then return
   let withCtorTypeName := mkWithCtorTypeName indName
   let casesOnName := mkCasesOnName indName
   let casesOnInfo ← getConstVal casesOnName
@@ -151,7 +150,6 @@ def mkWithCtor (indName : Name) : MetaM Unit := do
     mkLambdaFVars (params ++ #[motive, ctorIdx] ++ ism ++ #[h, k]) e
 
   let declName := mkWithCtorName indName
-  -- not compiled to avoid old code generator bug #1774
   addAndCompile (.defnDecl (← mkDefinitionValInferringUnsafe
     (name        := declName)
     (levelParams := casesOnInfo.levelParams)
@@ -163,10 +161,20 @@ def mkWithCtor (indName : Name) : MetaM Unit := do
   modifyEnv fun env => addProtected env declName
   setReducibleAttribute declName
 
+/--
+Specialies `T.withCtor` for each constructor as `T.con.with`.
+-/
+def mkConWith (indName : Name) : MetaM Unit := do
+  let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
+  let casesOnName := mkCasesOnName indName
+  let casesOnInfo ← getConstVal casesOnName
+  let v::us := casesOnInfo.levelParams.map mkLevelParam | panic! "unexpected universe levels on `casesOn`"
+  let withCtorName := mkWithCtorName indName
+  let withCtorTypeName := mkWithCtorTypeName indName
+  let casesOnInfo ← getConstVal casesOnName
   -- Now specialize for each constructor
-  for i in [0:info.numCtors] do
-    let ctorName := info.ctors[i]!
-    let ctorDeclName := mkCtorWithName ctorName
+  for i in [:info.numCtors] do
+    let declName := mkCtorWithName info.ctors[i]!
     let e ← forallTelescope casesOnInfo.type fun xs _ => do
       let params : Array Expr := xs[:info.numParams]
       let motive := xs[info.numParams]!
@@ -178,7 +186,7 @@ def mkWithCtor (indName : Name) : MetaM Unit := do
       let toCtorApp := mkAppN (mkConst (mkToCtorIdxName indName) us) (params ++ ism)
       let hType ← mkEq toCtorApp (mkNatLit i)
       withLocalDeclD `h hType fun h => do
-      let e := mkConst declName (v :: us)
+      let e := mkConst withCtorName (v :: us)
       let e := mkAppN e params
       let e := mkApp e motive
       let e := mkApp e (mkNatLit i)
@@ -188,31 +196,25 @@ def mkWithCtor (indName : Name) : MetaM Unit := do
       let e := mkApp e (← withMkPULiftUp withCtorTypeApp fun _ => pure alt)
       mkLambdaFVars (params ++ #[motive] ++ ism ++ #[h, alt]) e
 
-    addAndCompile (.defnDecl {
-      name        := ctorDeclName
-      levelParams := casesOnInfo.levelParams
-      type        := (← inferType e)
-      value       := e
-      safety      := DefinitionSafety.safe
-      hints       := ReducibilityHints.abbrev
-    })
-    setReducibleAttribute ctorName
+    addAndCompile (.defnDecl (← mkDefinitionValInferringUnsafe
+      (name        := declName)
+      (levelParams := casesOnInfo.levelParams)
+      (type        := (← inferType e))
+      (value       := e)
+      (hints       := ReducibilityHints.abbrev)
+    ))
+    modifyEnv fun env => addToCompletionBlackList env declName
+    modifyEnv fun env => addProtected env declName
+    setReducibleAttribute declName
 
-inductive Vec (α : Type u) : Nat → Type u
-  | nil  : Vec α 0
-  | cons : α → {n : Nat} → Vec α n → Vec α (n+1)
+public def mkWithCtor (indName : Name) : MetaM Unit := do
+  let .inductInfo indVal ← getConstInfo indName | return
+  -- Do not do anything if there are no constructors
+  if indVal.numCtors = 0 then return
+  -- Do not do anything unless can_elim_to_type.
+  let recInfo ← getConstInfo (mkRecName indName)
+  unless recInfo.levelParams.length > indVal.levelParams.length do return
 
--- #check Vec.casesOn
-
--- set_option debug.skipKernelTC true
-
-run_meta
-  mkToCtorIdx ``Vec
-  mkWithCtorType ``Vec
-  mkWithCtor ``Vec
-
-
--- #print Vec.noConfusionType.withCtorType
-#print Vec.withCtorType
-#print Vec.nil.with
-#print Vec.cons.with
+  mkWithCtorType indName
+  mkIndWithCtor indName
+  mkConWith indName
