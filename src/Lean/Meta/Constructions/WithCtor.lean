@@ -77,8 +77,8 @@ def mkWithCtorTypeName (indName : Name) : Name :=
 def mkWithCtorName (indName : Name) : Name :=
   Name.str indName "withCtor"
 
-def mkCtorWithName (indName : Name) : Name :=
-  Name.str indName "with"
+def mkCtorWithName (conName : Name) : Name :=
+  Name.str conName "with"
 
 def mkWithCtorType (indName : Name) : MetaM Unit := do
   let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!

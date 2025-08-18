@@ -32,8 +32,6 @@ def mkNoConfusionCore (declName : Name) : MetaM Unit := do
   let useLinear ← NoConfusionLinear.canUse
 
   if useLinear then
-    NoConfusionLinear.mkWithCtorType declName
-    NoConfusionLinear.mkWithCtor declName
     NoConfusionLinear.mkNoConfusionTypeLinear declName
   else
     let name := Name.mkStr declName "noConfusionType"
