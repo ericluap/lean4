@@ -156,6 +156,11 @@ def mkIndWithCtor (indName : Name) : MetaM Unit := do
   modifyEnv fun env => addProtected env declName
   setReducibleAttribute declName
 
+def asPrivateAs (n1 n2 : Name) : Name :=
+  match privatePrefix? n2 with
+  | some p => Name.appendCore p (privateToUserName n1)
+  | none => (privateToUserName n1)
+
 /--
 Specialies `T.withCtor` for each constructor as `T.con.with`.
 -/
@@ -170,6 +175,7 @@ def mkConWith (indName : Name) : MetaM Unit := do
   -- Now specialize for each constructor
   for i in [:info.numCtors] do
     let declName := mkCtorWithName info.ctors[i]!
+    let declName := asPrivateAs declName casesOnName
     let e ← forallTelescope casesOnInfo.type fun xs _ => do
       let params : Array Expr := xs[:info.numParams]
       let motive := xs[info.numParams]!

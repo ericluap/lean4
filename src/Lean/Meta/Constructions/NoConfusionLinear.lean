@@ -59,6 +59,11 @@ def mkNoConfusionTypeName (indName : Name) : Name :=
 def mkCtorWithName (conName : Name) : Name :=
   Name.str conName "with"
 
+def asPrivateAs (n1 n2 : Name) : Name :=
+  match privatePrefix? n2 with
+  | some p => Name.appendCore p (privateToUserName n1)
+  | none => (privateToUserName n1)
+
 def mkIfNatEq (P : Expr) (e1 e2 : Expr) («then» : Expr → MetaM Expr) («else» : Expr → MetaM Expr) : MetaM Expr := do
   let heq := mkApp3 (mkConst ``Eq [1]) (mkConst ``Nat) e1 e2
   let u ← getLevel P
@@ -98,7 +103,9 @@ public def mkNoConfusionTypeLinear (indName : Name) : MetaM Unit := do
                 let alt ← mkIfNatEq PType (toCtorIdxApp) (mkNatLit i)
                   («else» := fun _ => pure P) fun h => do
                   let conName := info.ctors[i]!
-                  let e := mkConst (mkCtorWithName conName) (v.succ :: us)
+                  let withName := mkCtorWithName conName
+                  let withName := asPrivateAs withName casesOnName
+                  let e := mkConst withName (v.succ :: us)
                   let e := mkAppN e xs
                   let e := mkApp e motive
                   let e := mkAppN e ys
