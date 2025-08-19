@@ -209,7 +209,7 @@ def mkConWith (indName : Name) : MetaM Unit := do
       (value       := e)
       (hints       := ReducibilityHints.abbrev)
     ))
-    -- modifyEnv fun env => markAuxRecursor env declName
+    modifyEnv fun env => markAuxRecursor env declName
     modifyEnv fun env => addToCompletionBlackList env declName
     modifyEnv fun env => addProtected env declName
     Elab.Term.elabAsElim.setTag declName

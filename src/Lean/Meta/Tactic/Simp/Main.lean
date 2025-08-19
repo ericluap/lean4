@@ -132,6 +132,7 @@ private def reduceFVar (cfg : Config) (thms : SimpTheoremsArray) (e : Expr) : Si
   def declName ... :=
     match ... with
     | ...
+  (or an equivalent `casesOn` match)
   ```
 -/
 private partial def isMatchDef (declName : Name) : CoreM Bool := do
@@ -143,7 +144,7 @@ where
       go env e.bindingBody!
     else
       let f := e.getAppFn
-      f.isConst && isMatcherCore env f.constName!
+      f.isConst && (isMatcherCore env f.constName! || isAuxRecursor env f.constName!)
 
 /--
 Try to unfold `e`.
@@ -163,7 +164,7 @@ private def unfold? (e : Expr) : SimpM (Option Expr) := do
        || (smartUnfolding.get options && (← getEnv).contains (mkSmartUnfoldingNameFor fName)) then
       unfoldDefinitionAny? e
     else
-      -- `We are not unfolding partial applications, and `fName` does not have smart unfolding support.
+      -- We are not unfolding partial applications, and `fName` does not have smart unfolding support.
       -- Thus, we must check whether the arity of the function >= number of arguments.
       let some cinfo := (← getEnv).find? fName | return none
       let some value := cinfo.value? | return none
