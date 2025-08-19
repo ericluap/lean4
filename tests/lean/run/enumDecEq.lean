@@ -2,6 +2,12 @@ inductive Foo1 where
   | a1
   deriving DecidableEq
 
+/--
+info: def Foo1.ofNat : Nat → Foo1 :=
+fun n => Foo1.a1
+-/
+#guard_msgs in
+#print Foo1.ofNat
 
 inductive Foo2 where
   | a1 | a2

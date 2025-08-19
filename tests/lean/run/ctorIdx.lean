@@ -55,10 +55,11 @@ fun {m a} x => x.casesOn (fun {n} a => 0) (fun {n} a => 1) 2
 #print B.toCtorIdx
 
 
--- No ctorIdx for single-constructor inductives
-
 unsafe inductive U : Type | mk : (U → U) → U
-/-- error: Unknown constant `U.toCtorIdx` -/
+/--
+info: @[reducible] unsafe protected def U.toCtorIdx : U → Nat :=
+fun x => U.casesOn x fun a => 0
+-/
 #guard_msgs in
 #print U.toCtorIdx
 

@@ -28,7 +28,6 @@ public def mkToCtorIdx (indName : Name) : MetaM Unit := do
     if indName == ``Int && !(← hasConst ``Int.decEq) then return
 
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
-    unless info.numCtors > 1 do return
     if (← isPropFormerType info.type) then return
     let casesOnName := mkCasesOnName indName
     let casesOnInfo ← getConstInfo casesOnName
