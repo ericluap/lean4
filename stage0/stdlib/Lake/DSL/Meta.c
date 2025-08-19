@@ -111,7 +111,6 @@ uint8_t lean_nat_dec_eq(lean_object*, lean_object*);
 static lean_object* l_Lake_DSL_elabRunIO___closed__15;
 LEAN_EXPORT lean_object* l_Lean_logInfoAt___at___Lake_DSL_elabRunIO_spec__4___boxed(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_Name_mkStr2(lean_object*, lean_object*);
-lean_object* l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__0___redArg(lean_object*, lean_object*, lean_object*);
 lean_object* l_Lean_throwErrorAt___at___Lean_Elab_Term_elabParserName_x3f_spec__0___redArg(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 static lean_object* l_IO_FS_withIsolatedStreams___at___Lake_DSL_elabRunIO_spec__0___redArg___closed__4;
 uint8_t l_Lean_Syntax_isNone(lean_object*);
@@ -146,6 +145,7 @@ LEAN_EXPORT lean_object* l_Lake_DSL_elabMetaIf___regBuiltin_Lake_DSL_elabMetaIf_
 LEAN_EXPORT lean_object* l_Lake_DSL_expandCmdDo(lean_object*);
 static lean_object* l_Lake_DSL_elabRunIO___closed__7;
 LEAN_EXPORT lean_object* l_Lake_DSL_elabRunIO___lam__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
+lean_object* l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__8___redArg(lean_object*, lean_object*, lean_object*);
 LEAN_EXPORT lean_object* l_IO_withStdout___at___IO_FS_withIsolatedStreams___at___Lake_DSL_elabRunIO_spec__0_spec__0(lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*, lean_object*);
 static lean_object* _init_l_Lake_DSL_expandCmdDo___closed__0() {
 _start:
@@ -1142,10 +1142,10 @@ block_15:
 lean_object* x_13; lean_object* x_14; 
 x_13 = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(x_13, 0, x_12);
-lean_ctor_set(x_13, 1, x_11);
+lean_ctor_set(x_13, 1, x_10);
 x_14 = lean_alloc_ctor(0, 2, 0);
 lean_ctor_set(x_14, 0, x_13);
-lean_ctor_set(x_14, 1, x_10);
+lean_ctor_set(x_14, 1, x_11);
 return x_14;
 }
 block_42:
@@ -1181,8 +1181,8 @@ lean_object* x_35; lean_object* x_36;
 lean_dec_ref(x_33);
 x_35 = l_IO_FS_withIsolatedStreams___at___Lake_DSL_elabRunIO_spec__0___redArg___closed__4;
 x_36 = l_panic___at_____private_Lean_Elab_MacroArgUtil_0__Lean_Elab_Command_expandMacroArg_mkSyntaxAndPat_spec__0(x_35);
-x_10 = x_32;
-x_11 = x_28;
+x_10 = x_28;
+x_11 = x_32;
 x_12 = x_36;
 goto block_15;
 }
@@ -1191,8 +1191,8 @@ else
 lean_object* x_37; 
 x_37 = lean_string_from_utf8_unchecked(x_33);
 lean_dec_ref(x_33);
-x_10 = x_32;
-x_11 = x_28;
+x_10 = x_28;
+x_11 = x_32;
 x_12 = x_37;
 goto block_15;
 }
@@ -1688,7 +1688,7 @@ lean_object* x_66; lean_object* x_67; lean_object* x_68; lean_object* x_69; lean
 x_66 = lean_ctor_get(x_65, 1);
 lean_inc(x_66);
 lean_dec_ref(x_65);
-x_67 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__0___redArg(x_63, x_6, x_66);
+x_67 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__8___redArg(x_63, x_6, x_66);
 x_68 = lean_ctor_get(x_67, 0);
 lean_inc(x_68);
 x_69 = lean_ctor_get(x_67, 1);
@@ -2049,7 +2049,7 @@ lean_object* x_136; lean_object* x_137; lean_object* x_138; lean_object* x_139; 
 x_136 = lean_ctor_get(x_135, 1);
 lean_inc(x_136);
 lean_dec_ref(x_135);
-x_137 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__0___redArg(x_133, x_6, x_136);
+x_137 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__8___redArg(x_133, x_6, x_136);
 x_138 = lean_ctor_get(x_137, 0);
 lean_inc(x_138);
 x_139 = lean_ctor_get(x_137, 1);
@@ -2579,7 +2579,7 @@ lean_object* x_257; lean_object* x_258; lean_object* x_259; lean_object* x_260; 
 x_257 = lean_ctor_get(x_256, 1);
 lean_inc(x_257);
 lean_dec_ref(x_256);
-x_258 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__0___redArg(x_254, x_6, x_257);
+x_258 = l_Lean_instantiateMVars___at___Lean_Elab_Term_elabLetDeclAux_spec__8___redArg(x_254, x_6, x_257);
 x_259 = lean_ctor_get(x_258, 0);
 lean_inc(x_259);
 x_260 = lean_ctor_get(x_258, 1);

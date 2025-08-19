@@ -54,17 +54,17 @@
       dec x_2;
       ret x_6
 [Compiler.IR] [result]
-    def Exp.var.with._redArg (x_1 : tobj) (x_2 : obj) : tobj :=
+    def Exp.var.with._redArg (x_1 : tobj) (x_2 : tobj) : tobj :=
       let x_3 : tobj := Exp.withCtor._redArg x_1 x_2;
       ret x_3
-    def Exp.var.with (x_1 : ◾) (x_2 : tobj) (x_3 : ◾) (x_4 : obj) : tobj :=
+    def Exp.var.with (x_1 : ◾) (x_2 : tobj) (x_3 : ◾) (x_4 : tobj) : tobj :=
       let x_5 : tobj := Exp.withCtor._redArg x_2 x_4;
       ret x_5
 [Compiler.IR] [result]
-    def Exp.app.with._redArg (x_1 : tobj) (x_2 : obj) : tobj :=
+    def Exp.app.with._redArg (x_1 : tobj) (x_2 : tobj) : tobj :=
       let x_3 : tobj := Exp.withCtor._redArg x_1 x_2;
       ret x_3
-    def Exp.app.with (x_1 : ◾) (x_2 : tobj) (x_3 : ◾) (x_4 : obj) : tobj :=
+    def Exp.app.with (x_1 : ◾) (x_2 : tobj) (x_3 : ◾) (x_4 : tobj) : tobj :=
       let x_5 : tobj := Exp.withCtor._redArg x_2 x_4;
       ret x_5
 [Compiler.IR] [result]
@@ -103,7 +103,7 @@
       let x_5 : tobj := Exp.withCtor._redArg x_2 x_4;
       ret x_5
 [Compiler.IR] [result]
-    def Exp.casesOn._override._redArg (x_1 : tobj) (x_2 : obj) (x_3 : obj) (x_4 : @& tobj) (x_5 : @& tobj) (x_6 : @& tobj) (x_7 : @& tobj) (x_8 : @& tobj) : tobj :=
+    def Exp.casesOn._override._redArg (x_1 : tobj) (x_2 : tobj) (x_3 : tobj) (x_4 : @& tobj) (x_5 : @& tobj) (x_6 : @& tobj) (x_7 : @& tobj) (x_8 : @& tobj) : tobj :=
       case x_1 : tobj of
       Exp.var._impl →
         dec x_3;
@@ -146,7 +146,7 @@
         dec x_2;
         inc x_8;
         ret x_8
-    def Exp.casesOn._override (x_1 : ◾) (x_2 : tobj) (x_3 : obj) (x_4 : obj) (x_5 : @& tobj) (x_6 : @& tobj) (x_7 : @& tobj) (x_8 : @& tobj) (x_9 : @& tobj) : tobj :=
+    def Exp.casesOn._override (x_1 : ◾) (x_2 : tobj) (x_3 : tobj) (x_4 : tobj) (x_5 : @& tobj) (x_6 : @& tobj) (x_7 : @& tobj) (x_8 : @& tobj) (x_9 : @& tobj) : tobj :=
       case x_2 : tobj of
       Exp.var._impl →
         dec x_4;
@@ -189,7 +189,7 @@
         dec x_3;
         inc x_9;
         ret x_9
-    def Exp.casesOn._override._redArg._boxed (x_1 : tobj) (x_2 : obj) (x_3 : obj) (x_4 : tobj) (x_5 : tobj) (x_6 : tobj) (x_7 : tobj) (x_8 : tobj) : tobj :=
+    def Exp.casesOn._override._redArg._boxed (x_1 : tobj) (x_2 : tobj) (x_3 : tobj) (x_4 : tobj) (x_5 : tobj) (x_6 : tobj) (x_7 : tobj) (x_8 : tobj) : tobj :=
       let x_9 : tobj := Exp.casesOn._override._redArg x_1 x_2 x_3 x_4 x_5 x_6 x_7 x_8;
       dec x_8;
       dec x_7;
@@ -197,7 +197,7 @@
       dec x_5;
       dec x_4;
       ret x_9
-    def Exp.casesOn._override._boxed (x_1 : tobj) (x_2 : tobj) (x_3 : obj) (x_4 : obj) (x_5 : tobj) (x_6 : tobj) (x_7 : tobj) (x_8 : tobj) (x_9 : tobj) : tobj :=
+    def Exp.casesOn._override._boxed (x_1 : tobj) (x_2 : tobj) (x_3 : tobj) (x_4 : tobj) (x_5 : tobj) (x_6 : tobj) (x_7 : tobj) (x_8 : tobj) (x_9 : tobj) : tobj :=
       let x_10 : tobj := Exp.casesOn._override x_1 x_2 x_3 x_4 x_5 x_6 x_7 x_8 x_9;
       dec x_9;
       dec x_8;
