@@ -95,9 +95,8 @@ def mkContext (fnPrefix : String) (typeName : Name) : TermElabM Context := do
     typeInfos := typeInfos.push (← getConstInfoInduct typeName)
   let mut auxFunNames := #[]
   for typeName in indVal.all do
-    match typeName.eraseMacroScopes with
-    | .str _ t => auxFunNames := auxFunNames.push (← mkFreshUserName <| Name.mkSimple <| fnPrefix ++ t)
-    | _        => auxFunNames := auxFunNames.push (← mkFreshUserName `instFn)
+    let auxFunName := (privateToUserName typeName).modifyBase (·.str s!"_{fnPrefix}")
+    auxFunNames := auxFunNames.push auxFunName
   trace[Elab.Deriving.beq] "{auxFunNames}"
   let usePartial := indVal.isNested || typeInfos.size > 1
   return {
