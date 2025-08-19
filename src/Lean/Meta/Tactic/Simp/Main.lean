@@ -132,7 +132,6 @@ private def reduceFVar (cfg : Config) (thms : SimpTheoremsArray) (e : Expr) : Si
   def declName ... :=
     match ... with
     | ...
-  (or an equivalent `casesOn` match)
   ```
 -/
 private partial def isMatchDef (declName : Name) : CoreM Bool := do
@@ -144,7 +143,7 @@ where
       go env e.bindingBody!
     else
       let f := e.getAppFn
-      f.isConst && (isMatcherCore env f.constName! || isAuxRecursor env f.constName!)
+      f.isConst && isMatcherCore env f.constName!
 
 /--
 Try to unfold `e`.
