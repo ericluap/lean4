@@ -14,6 +14,11 @@ public import Lean.Meta.Constructions.NoConfusionLinear
 
 open Lean Meta
 
+register_builtin_option genToCtorIdx : Bool := {
+  defValue := true
+  descr    := "generate the `toCtorIdx` functions for inductive datatypes"
+}
+
 /--
 For an inductive type `T` with more than one function builds a function `T.toCtorIdx : T → Nat` that
 returns the constructor index of the given value.
@@ -22,11 +27,7 @@ Assumes `T.casesOn` to be defined already.
 -/
 public def mkToCtorIdx (indName : Name) : MetaM Unit := do
   prependError m!"failed to construct `T.toCtorIdx` for `{.ofConstName indName}`:" do
-    -- These types have `.casesOn` functions that we cannot use in compiled code before the
-    -- corresponding `decEq` function is available, so do not create this eagerly
-    if indName == ``Nat && !(← hasConst ``Nat.decEq) then return
-    if indName == ``Int && !(← hasConst ``Int.decEq) then return
-
+    unless genToCtorIdx.get (← getOptions) do return
     let ConstantInfo.inductInfo info ← getConstInfo indName | unreachable!
     if (← isPropFormerType info.type) then return
     let casesOnName := mkCasesOnName indName

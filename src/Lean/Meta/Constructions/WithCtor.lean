@@ -13,6 +13,8 @@ public import Lean.Meta.CompletionName
 import Lean.Meta.Constructions.ToCtorIdx
 import Lean.Meta.NatTable
 import Lean.Elab.App
+import Lean.Meta.Tactic.Simp.SimpTheorems
+import Lean.Meta.Tactic.Simp.Attr
 
 namespace Lean
 
@@ -153,6 +155,7 @@ def mkIndWithCtor (indName : Name) : MetaM Unit := do
     (value       := e)
     (hints       := ReducibilityHints.abbrev)
   ))
+  modifyEnv fun env => markAuxRecursor env declName
   modifyEnv fun env => addToCompletionBlackList env declName
   modifyEnv fun env => addProtected env declName
   setReducibleAttribute declName
@@ -197,18 +200,49 @@ def mkConWith (indName : Name) : MetaM Unit := do
       let withCtorTypeApp := mkAppN (mkConst withCtorTypeName (v :: us)) ((params.push motive).push (mkRawNatLit i))
       let e := mkApp e (← withMkPULiftUp withCtorTypeApp fun _ => pure alt)
       mkLambdaFVars (params ++ #[motive] ++ ism ++ #[h, alt]) e
+    let declType ← inferType e
 
     addAndCompile (.defnDecl (← mkDefinitionValInferringUnsafe
       (name        := declName)
       (levelParams := casesOnInfo.levelParams)
-      (type        := (← inferType e))
+      (type        := declType)
       (value       := e)
       (hints       := ReducibilityHints.abbrev)
     ))
+    -- modifyEnv fun env => markAuxRecursor env declName
     modifyEnv fun env => addToCompletionBlackList env declName
     modifyEnv fun env => addProtected env declName
     Elab.Term.elabAsElim.setTag declName
     setReducibleAttribute declName
+
+    -- Also prove the  dsimp theorem
+    unless info.isUnsafe do
+      let thmName := declName.str "eq"
+      let thmType ← forallBoundedTelescope declType (some (info.numParams + 1)) fun xs _ => do
+        let params : Array Expr := xs[:info.numParams]
+        let motive := xs[info.numParams]!
+        let ctorInfo ← getConstInfoCtor info.ctors[i]!
+        let ctorType ← instantiateForall ctorInfo.type params
+        forallBoundedTelescope ctorType ctorInfo.numFields fun ys ctorResult => do
+          let ctorApp := mkAppN (mkConst info.ctors[i]! us) (params ++ ys)
+          let indices := (← whnf ctorResult).getAppArgs[info.numParams:]
+          let lhs := mkConst declName (v :: us)
+          let lhs := mkAppN lhs (params ++ #[motive] ++ indices ++ #[ctorApp])
+          forallBoundedTelescope (← inferType lhs) (some 2) fun h_and_alt _ => do
+            let alt := h_and_alt[1]!
+            let lhs := mkAppN lhs h_and_alt
+            let rhs := mkAppN alt ys
+            let t ← mkEq lhs rhs
+            mkForallFVars (xs ++ ys ++ h_and_alt) t
+      let thmVal ← forallTelescope thmType fun xs r => do mkLambdaFVars xs (← mkEqRefl r.appArg!)
+      addDecl (.thmDecl {
+        name        := thmName
+        levelParams := casesOnInfo.levelParams
+        type        := thmType
+        value       := thmVal
+      })
+      defeqAttr.setTag thmName
+      addSimpTheorem (ext := simpExtension) thmName (post := true) (inv := false) AttributeKind.global (prio := eval_prio default)
 
 
 public def mkWithCtor (indName : Name) : MetaM Unit := do
